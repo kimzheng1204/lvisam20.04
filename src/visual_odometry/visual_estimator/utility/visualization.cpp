@@ -82,7 +82,9 @@ void pubLatestOdometry(const Eigen::Vector3d &P, const Eigen::Quaterniond &Q, co
     odometry.pose.covariance[0] = double(failureId); // notify lidar odometry failure
 
     tf::Quaternion q_odom_cam(Q.x(), Q.y(), Q.z(), Q.w());
-    tf::Quaternion q_cam_to_lidar(0, 1, 0, 0); // mark: camera - lidar
+    //tf::Quaternion q_cam_to_lidar(0, 1, 0, 0); // mark: camera - lidar
+    tf::Quaternion q_cam_to_lidar(0, 0, 0, 1); 
+    
     tf::Quaternion q_odom_ros = q_odom_cam * q_cam_to_lidar;
     tf::quaternionTFToMsg(q_odom_ros, odometry.pose.pose.orientation);
     pub_latest_odometry_ros.publish(odometry);
@@ -94,7 +96,10 @@ void pubLatestOdometry(const Eigen::Vector3d &P, const Eigen::Quaterniond &Q, co
 
     if (ALIGN_CAMERA_LIDAR_COORDINATE)
     {
-        static tf::Transform t_odom_world = tf::Transform(tf::createQuaternionFromRPY(0, 0, M_PI), tf::Vector3(0, 0, 0));
+        //static tf::Transform t_odom_world = tf::Transform(tf::createQuaternionFromRPY(0, 0, M_PI), tf::Vector3(0, 0, 0));
+        static tf::Transform t_odom_world = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
+        
+        
         if (header.stamp.toSec() - last_align_time > 1.0)
         {
             try

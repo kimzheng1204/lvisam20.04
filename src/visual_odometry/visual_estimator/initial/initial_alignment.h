@@ -80,12 +80,21 @@ public:
     ros::Publisher pub_latest_odometry; 
 
     odometryRegister(ros::NodeHandle n_in):
+    // n(n_in)
+    // {
+    //     q_lidar_to_cam = tf::Quaternion(0, 1, 0, 0); // rotate orientation // mark: camera - lidar
+    //     q_lidar_to_cam_eigen = Eigen::Quaterniond(0, 0, 0, 1); // rotate position by pi, (w, x, y, z) // mark: camera - lidar
+    //     // pub_latest_odometry = n.advertise<nav_msgs::Odometry>("odometry/test", 1000);
+    // }
+
     n(n_in)
     {
-        q_lidar_to_cam = tf::Quaternion(0, 1, 0, 0); // rotate orientation // mark: camera - lidar
-        q_lidar_to_cam_eigen = Eigen::Quaterniond(0, 0, 0, 1); // rotate position by pi, (w, x, y, z) // mark: camera - lidar
+        q_lidar_to_cam = tf::Quaternion(0, 0, 0, 1); // rotate orientation // mark: camera - lidar
+        q_lidar_to_cam_eigen = Eigen::Quaterniond(1, 0, 0, 0); // rotate position by pi, (w, x, y, z) // mark: camera - lidar
         // pub_latest_odometry = n.advertise<nav_msgs::Odometry>("odometry/test", 1000);
     }
+
+
 
     // convert odometry from ROS Lidar frame to VINS camera frame
     vector<float> getOdometry(deque<nav_msgs::Odometry>& odomQueue, double img_time)
@@ -130,7 +139,9 @@ public:
         tf::Quaternion q_odom_lidar;
         tf::quaternionMsgToTF(odomCur.pose.pose.orientation, q_odom_lidar);
 
-        tf::Quaternion q_odom_cam = tf::createQuaternionFromRPY(0, 0, M_PI) * (q_odom_lidar * q_lidar_to_cam); // global rotate by pi // mark: camera - lidar
+        //tf::Quaternion q_odom_cam = tf::createQuaternionFromRPY(0, 0, M_PI) * (q_odom_lidar * q_lidar_to_cam); // global rotate by pi // mark: camera - lidar
+        tf::Quaternion q_odom_cam = tf::createQuaternionFromRPY(0, 0, M_PI / 2.0) * (q_odom_lidar * q_lidar_to_cam);
+        
         tf::quaternionTFToMsg(q_odom_cam, odomCur.pose.pose.orientation);
 
         // convert odometry position from lidar ROS frame to VINS camera frame
